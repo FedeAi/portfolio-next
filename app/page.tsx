@@ -165,8 +165,7 @@ export default function Page() {
             "Developed advanced software for autonomous racing vehicles EAV-24 (Super Formula)",
             "Focused on improving trajectory planning for head-to-head racing scenarios",
             "Worked on the estimate of overtake zone on road-courses"
-          ]}
-        />
+          ]} description={undefined} link={undefined}        />
 
         <ExperienceSection
           title="Dynamis PRC - Formula Student Team"
@@ -177,16 +176,17 @@ export default function Page() {
             "Oversaw the development of perception, localization, mapping, trajectory planning, and control systems",
             "Coordinated cross-functional efforts to ensure peak performance in competitive racing conditions",
             "Gained hands-on experience in autonomous vehicle technology within a high-pressure, competitive environment"
-          ]}
-        />
+          ]} 
+          description={undefined} 
+          link={undefined}        />
 
         <ExperienceSection
           title="Argo Robot Co-Founder"
           imageSrc="/argo.png"
           imageAlt="Argo Robot prototype"
           description="Developing innovative home companion robots for entertainment, education, and security."
-          link="https://argorobot.it/"
-        />
+          link="https://argorobot.it/" 
+          points={undefined}        />
       </div>
 
       <div className="mt-12">
