@@ -1,0 +1,61 @@
+---
+title: "Autonomous Functionality in Formula Student Dynamis PRC"
+publishedAt: "2024-10-19"
+tags: "Autonomous Driving, AI, Racing"
+summary: "An overview of the autonomous driving modules in the Dynamis PRC Formula Student car."
+---
+
+# Autonomous Functionality in Formula Student Dynamis PRC
+
+## Introduction
+
+Formula Student competitions push the boundaries of automotive engineering, and the Dynamis PRC team is at the forefront of innovation with its driverless car. The team’s cutting-edge autonomous functionalities are a crucial element in ensuring success on the racetrack. This blog provides a high-level overview of the various modules responsible for the car's autonomous driving capabilities.
+
+## 1. Sensor Suite
+
+The **sensor suite** forms the foundation of the car’s perception. It includes:
+
+- **Cameras**: Two mono cameras are mounted on the main hoop, providing a 50-60 degree field of view each. They work in tandem to detect cones on the track, feeding color data into the system for object detection.
+- **Lidar**: A 10Hz rotational Lidar supplies crucial distance and object detection data with a horizontal FOV of almost 180 degrees. This is mounted in the same location as the cameras.
+- **Inertial Navigation System (INS)**: Installed at the vehicle's center of gravity, the INS assists with localization by providing GPS and movement data.
+- **Optical Speed Sensor**: Mounted on the front left wheel, this sensor enhances speed measurement accuracy.
+
+## 2. Autonomous Steering and Brake Actuators
+
+Autonomous control is executed via:
+
+- **Steering Actuator**: A BLDC motor drives the steering in a steer-by-wire system, which is critical for precise control during high-speed maneuvers.
+- **Brake Actuator**: The brake system ensures responsive stopping power, maintaining safety during autonomous operations.
+
+## 3. Autonomous System Computing Unit (ASCU)
+
+The **NVIDIA Jetson Orin AGX** powers the vehicle's autonomous systems. With its 64-core CPU and AI-focused architecture, it processes sensor data and executes complex decision-making algorithms in real time.
+
+## 4. Software Framework: ROS2
+
+The software architecture leverages **ROS2** for managing sensor communication and processing. Key components include:
+
+- **Perception**: This module integrates camera and Lidar data to detect track cones and other obstacles.
+- **Estimation**: Using **SLAM (Simultaneous Localization and Mapping)**, the system builds a map of the track while localizing the car. The implementation uses FastSLAM and GraphSLAM to ensure precise positioning.
+- **Control**: The **Model Predictive Control (MPC)** algorithm computes the necessary steering and braking commands, ensuring the car follows its intended trajectory.
+- **Interfaces**: ROS2 serves as the interface connecting the sensors, actuators, and computing unit.
+
+## 5. Path Planning and Decision-Making
+
+Path planning relies on:
+
+- **SLAM**: Localization and map generation allow the vehicle to understand its environment and optimize its path.
+- **Trajectory Optimization**: The car computes optimal paths and velocity profiles in real-time, ensuring safe and efficient driving on the track.
+
+## 6. Simulator for Development and Testing
+
+To test and fine-tune the system, the team uses a custom simulator based on **FSSIM**. This allows the team to run simulations of track layouts and analyze vehicle behavior without needing physical access to the racetrack.
+
+## 7. Safety and Redundancy
+
+The **Status Controller** oversees the health of all critical systems. It monitors the incoming data and ensures the vehicle can be stopped safely if a malfunction occurs. If a critical message is missed, the car automatically enters **Emergency Mode**, guaranteeing safety during operations.
+
+## Conclusion
+
+The autonomous driving system of Dynamis PRC is a result of careful design, robust software architecture, and powerful hardware integration. The team's dedication to innovation and safety has resulted in a driverless vehicle capable of competing at the highest levels of Formula Student racing.
+
