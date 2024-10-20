@@ -1,0 +1,227 @@
+---
+title: "Mastering Quadratic Programming: From Theory to Practice"
+publishedAt: "2024-10-20"
+summary: "A deep dive into Quadratic Programming, covering theory, applications, and solution methods with practical examples."
+tags: "Optimization, Algorithms, Mathematics, Machine Learning"
+image: "/interior-point-smooth.png"
+---
+
+# Mastering Quadratic Programming: From Theory to Practice
+
+Quadratic Programming (QP) is a powerful optimization technique that plays a crucial role in various fields, from finance to machine learning. In this comprehensive guide, we'll explore what QP is, why it's important, and how to solve QP problems using different methods.
+
+## What is Quadratic Programming?
+
+Quadratic Programming is a type of mathematical optimization problem where we aim to minimize (or maximize) a quadratic objective function subject to linear constraints. The standard form of a QP problem is:
+
+$
+\min_x \frac{1}{2}x^THx + c^Tx
+$
+
+subject to:
+$
+Ax + b = 0
+$
+$
+Cx + d \leq 0
+$
+
+Where:
+- $x$ is the vector of variables we're optimizing
+- $H$ is a symmetric $n \times n$ matrix
+- $c$ is an $n$-dimensional vector
+- $A$ and $C$ are matrices representing equality and inequality constraints
+- $b$ and $d$ are vectors
+
+<Callout emoji="💡">
+A QP is convex if the matrix $H$ is positive semidefinite (i.e., $H \geq 0$). Convex QPs are particularly important because any local minimum is also a global minimum.
+</Callout>
+
+## Why is Quadratic Programming Important?
+
+QP has numerous applications across various domains:
+
+1. **Finance**: Portfolio optimization, risk management
+2. **Machine Learning**: Support Vector Machines (SVMs), least squares regression
+3. **Control Theory**: Model Predictive Control (MPC)
+4. **Economics**: Resource allocation, production planning
+5. **Engineering**: Structural design optimization
+
+## Solving Quadratic Programming Problems
+
+Let's explore how to solve QP problems, starting with the simplest case and moving to more complex scenarios.
+
+### 1. Unconstrained Quadratic Programming
+
+The unconstrained QP problem has the form:
+
+$
+\min_x f(x) = \frac{1}{2}x^THx + c^Tx
+$
+
+#### Solution:
+
+1. Find the gradient: $\nabla f(x) = Hx + c$
+2. Set the gradient to zero: $Hx + c = 0$
+3. Solve for $x$: $x^* = -H^{-1}c$
+
+This solution is a global minimum if $H$ is positive definite.
+
+### 2. Constrained Quadratic Programming
+
+For constrained QP problems, we need more sophisticated methods. But first, let's understand the optimality conditions.
+
+#### KKT Conditions
+
+The Karush-Kuhn-Tucker (KKT) conditions provide necessary conditions for optimality:
+
+1. Stationarity: $Hx^* + c + A^T\lambda^* + C^T\mu^* = 0$
+2. Primal Feasibility: $Ax^* + b = 0$ and $Cx^* + d \leq 0$
+3. Dual Feasibility: $\mu^* \geq 0$
+4. Complementary Slackness: $\mu_i^*(C_ix^* + d_i) = 0$ for all $i$
+
+Here, $\lambda^*$ and $\mu^*$ are the Lagrange multipliers for the equality and inequality constraints, respectively.
+
+#### Solution Methods
+
+Two main approaches are used to solve constrained QPs:
+
+##### a. Active-Set Methods
+
+Active-set methods work by guessing which inequality constraints are active (i.e., hold with equality) at the optimum.
+
+Steps:
+1. Start with an initial guess of the active set.
+2. Solve the equality-constrained QP (original equalities + active inequalities).
+3. Check KKT conditions:
+   - If all multipliers are non-negative, you're done.
+   - If not, update the active set and repeat.
+
+<Table
+  data={{
+    headers: ["Iteration", "Active Set", "Action"],
+    rows: [
+      ["1", "{1, 2}", "Solve QP with constraints 1 and 2 as equalities"],
+      ["2", "{1, 2, 3}", "μ₃ < 0, add constraint 3 to active set"],
+      ["3", "{1, 3}", "μ₂ < 0, remove constraint 2 from active set"],
+      ["4", "{1, 3}", "All KKT conditions satisfied, optimal solution found"],
+    ],
+  }}
+/>
+
+##### b. Interior-Point Methods
+
+Interior-point methods approach the solution from the interior of the feasible region.
+
+Key idea: Replace inequality constraints with a barrier function.
+
+Steps:
+1. Transform the problem:
+   $
+   \min_x f(x) - t\sum_{i=1}^m \log(-g_i(x))
+   $
+   where $g_i(x) \leq 0$ are the inequality constraints and $t > 0$ is a parameter.
+2. Solve this problem for decreasing values of $t$.
+3. As $t \to 0$, the solution approaches the true optimum.
+
+<Image
+  src="/interior-point-smooth.png"
+  alt="Interior-point method visualization"
+  width={640}
+  height={500}
+/>
+
+<Caption>
+  Interior-point strategies replace the non-smooth complementarity conditions with a smooth nonlinear equality.
+</Caption>
+
+### Comparison of Methods
+
+<Table
+  data={{
+    headers: ["Aspect", "Active-Set Methods", "Interior-Point Methods"],
+    rows: [
+      [
+        "Efficiency for small problems",
+        "Generally more efficient",
+        "Can be less efficient due to overhead",
+      ],
+      [
+        "Efficiency for large problems",
+        "Can struggle with many constraints",
+        "Highly efficient, especially with many constraints",
+      ],
+      [
+        "Warm-starting",
+        "Easy to warm-start",
+        "More difficult to warm-start",
+      ],
+      [
+        "Iterative behavior",
+        "Can jump to solution in finite steps",
+        "Approaches solution smoothly",
+      ],
+    ],
+  }}
+/>
+
+## Practical Example: Portfolio Optimization
+
+Let's consider a practical example of using QP for portfolio optimization.
+
+Problem: Allocate investments among $n$ assets to maximize expected return while minimizing risk.
+
+Formulation:
+- $x_i$: Proportion of wealth invested in asset $i$
+- $\mu_i$: Expected return of asset $i$
+- $\Sigma$: Covariance matrix of asset returns
+
+Objective:
+$
+\max_x (\mu^Tx - \lambda x^T\Sigma x)
+$
+
+subject to:
+$
+\sum_{i=1}^n x_i = 1
+$
+$
+x_i \geq 0 \text{ for all } i
+$
+
+Here's how you might implement this in Python using cvxpy:
+
+```python
+import cvxpy as cp
+import numpy as np
+
+# Problem data
+n = 10  # Number of assets
+mu = np.random.randn(n)  # Expected returns
+Sigma = np.random.randn(n, n)
+Sigma = Sigma.T @ Sigma  # Ensure Sigma is positive semidefinite
+lambda_reg = 1.0  # Risk aversion parameter
+
+# Define and solve the CVXPY problem
+x = cp.Variable(n)
+prob = cp.Problem(cp.Maximize(mu.T @ x - lambda_reg * cp.quad_form(x, Sigma)),
+                  [cp.sum(x) == 1, x >= 0])
+prob.solve()
+
+# Print result
+print("Optimal portfolio allocation:", x.value)
+print("Expected return:", mu.T @ x.value)
+print("Portfolio risk:", cp.quad_form(x, Sigma).value)
+```
+
+## Conclusion
+
+Quadratic Programming is a powerful tool in the optimization toolbox. Its ability to handle quadratic objectives with linear constraints makes it applicable to a wide range of real-world problems. Whether you're optimizing financial portfolios, training machine learning models, or designing control systems, understanding QP can be immensely beneficial.
+
+As we've seen, there are different approaches to solving QPs, each with its strengths. The choice between active-set and interior-point methods often depends on the specific problem characteristics and scale.
+
+<Callout emoji="🚀">
+Ready to dive deeper? Try implementing your own QP solver or explore advanced topics like Sequential Quadratic Programming (SQP) for solving general nonlinear programming problems!
+</Callout>
+
+Remember, while QP is a powerful technique, it's just one tool in the broader field of mathematical optimization. As you continue your journey in optimization, you'll encounter many other fascinating methods and problem types!
