@@ -1,0 +1,178 @@
+---
+title: "Line Search Methods in Unconstrained Optimization"
+publishedAt: "2024-10-20"
+summary: "An exploration of line search methods for solving unconstrained optimization problems, including their implementation and convergence properties."
+tags: "Optimization, Algorithms, Numerical Methods"
+---
+
+Line search methods are fundamental techniques in unconstrained optimization, playing a crucial role in finding local minima of continuous functions. In this post, we'll dive deep into these methods, exploring their implementation, convergence properties, and practical applications.
+
+## What are Line Search Methods?
+
+Line search methods are iterative algorithms used to solve unconstrained optimization problems of the form:
+
+$
+\min_{x \in \mathbb{R}^n} f(x)
+$
+
+where $f: \mathbb{R}^n \rightarrow \mathbb{R}$ is a continuous function.
+
+The main idea behind line search methods is to generate a sequence of points $\{x_k\}$ that converge to a local minimizer $x^*$. At each iteration, the algorithm:
+
+1. Computes a search direction $p_k$
+2. Determines a step length $t_k$
+3. Updates the current point: $x_{k+1} = x_k + t_k p_k$
+
+<Callout emoji="💡">
+The key to line search methods is finding an appropriate balance between the search direction and step length to ensure convergence to a local minimum.
+</Callout>
+
+## Implementation of Line Search Methods
+
+Let's break down the main components of a line search algorithm:
+
+### 1. Choosing the Search Direction
+
+The search direction $p_k$ is typically chosen as:
+
+$
+p_k = -H_k^{-1} \nabla f(x_k)
+$
+
+where $H_k$ is an approximation of the Hessian matrix. Different choices of $H_k$ lead to various methods:
+
+- **Steepest Descent**: $H_k = I$ (identity matrix)
+- **Newton's Method**: $H_k = \nabla^2 f(x_k)$ (exact Hessian)
+- **Quasi-Newton Methods**: $H_k$ is an approximation of the Hessian (e.g., BFGS update)
+
+### 2. Determining the Step Length
+
+The step length $t_k$ is usually chosen to satisfy certain conditions that ensure sufficient decrease in the objective function. Two common approaches are:
+
+a) **Exact Line Search**: Solve the one-dimensional optimization problem:
+
+$
+t_k = \arg\min_{t \geq 0} f(x_k + t p_k)
+$
+
+b) **Inexact Line Search**: Find $t_k$ satisfying certain conditions, such as the Armijo condition:
+
+$
+f(x_k + t_k p_k) \leq f(x_k) + c_1 t_k \nabla f(x_k)^T p_k
+$
+
+where $c_1 \in (0, 1)$ is a constant.
+
+### Backtracking Line Search
+
+One popular method for implementing inexact line search is the backtracking line search algorithm. This method starts with a relatively large step size and then reduces it iteratively until a sufficient decrease condition is met. Here's how it works:
+
+1. Start with an initial step size $t = t_{max}$ (often $t_{max} = 1$).
+2. Check if the current step size satisfies the Armijo condition.
+3. If the condition is not satisfied, reduce the step size by a factor $\rho \in (0, 1)$, i.e., $t = \rho t$.
+4. Repeat steps 2-3 until the Armijo condition is satisfied or a maximum number of iterations is reached.
+
+#### The Armijo Condition
+
+The Armijo condition, also known as the sufficient decrease condition, is a key component of backtracking line search. It ensures that the reduction in the objective function is proportional to the step size and the directional derivative. The condition is:
+
+$
+f(x_k + t_k p_k) \leq f(x_k) + c_1 t_k \nabla f(x_k)^T p_k
+$
+
+where:
+- $c_1$ is a constant, typically chosen to be small (e.g., $c_1 = 10^{-4}$)
+- $\nabla f(x_k)^T p_k$ is the directional derivative at $x_k$ along $p_k$
+
+<Callout emoji="🔍">
+The Armijo condition ensures that the actual reduction in the objective function (left-hand side) is at least a fraction $c_1$ of the reduction predicted by the linear approximation (right-hand side).
+</Callout>
+
+Here's a Python implementation of the backtracking line search algorithm:
+
+```python
+def backtracking_line_search(f, grad_f, x_k, p_k, alpha=1.0, rho=0.5, c1=1e-4, max_iter=100):
+    t = alpha
+    for _ in range(max_iter):
+        if f(x_k + t * p_k) <= f(x_k) + c1 * t * np.dot(grad_f(x_k), p_k):
+            return t
+        t *= rho
+    return t  # Return the last t if max_iter is reached
+```
+
+The backtracking line search method offers a good balance between simplicity and effectiveness. It's computationally efficient and helps ensure global convergence of the optimization algorithm.
+
+
+
+## Convergence Properties
+
+The convergence of line search methods depends on the choice of search direction and step length. Under certain conditions, we can guarantee:
+
+1. **Global Convergence**: The sequence $\{x_k\}$ converges to a stationary point of $f$.
+2. **Local Convergence**: Near a local minimum, the convergence rate can be linear, superlinear, or quadratic, depending on the method used.
+
+<Table
+  data={{
+    headers: ["Method", "Convergence Rate"],
+    rows: [
+      ["Steepest Descent", "Linear"],
+      ["Newton's Method", "Quadratic (if Hessian is positive definite)"],
+      ["BFGS (Quasi-Newton)", "Superlinear"],
+    ],
+  }}
+/>
+
+## Practical Implementation
+
+Here's a simple Python implementation of a line search method using the steepest descent direction:
+
+```python
+import numpy as np
+
+def line_search(f, grad_f, x0, max_iter=100, tol=1e-6):
+    x = x0
+    for i in range(max_iter):
+        g = grad_f(x)
+        if np.linalg.norm(g) < tol:
+            return x, f(x)
+        
+        p = -g  # Steepest descent direction
+        alpha = 0.1  # Fixed step size (can be improved with backtracking)
+        x_new = x + alpha * p
+        
+        while f(x_new) > f(x):
+            alpha *= 0.5
+            x_new = x + alpha * p
+        
+        x = x_new
+    
+    return x, f(x)
+
+# Example usage
+def f(x):
+    return x[0]**2 + x[1]**2
+
+def grad_f(x):
+    return np.array([2*x[0], 2*x[1]])
+
+x0 = np.array([1.0, 1.0])
+x_min, f_min = line_search(f, grad_f, x0)
+print(f"Minimum found at x = {x_min}, f(x) = {f_min}")
+```
+
+## Conclusion
+
+Line search methods are powerful tools for unconstrained optimization, offering a balance between simplicity and effectiveness. By carefully choosing the search direction and step length, these methods can efficiently find local minima for a wide range of problems.
+
+As you delve deeper into optimization algorithms, you'll find that line search methods form the foundation for more advanced techniques, such as trust region methods and conjugate gradient methods.
+
+<Callout emoji="🚀">
+Ready to implement your own line search algorithm? Start with the steepest descent method and gradually incorporate more sophisticated techniques like Newton's method or BFGS updates!
+</Callout>
+
+## References
+
+1. Nocedal, J., & Wright, S. (2006). Numerical optimization. Springer Science & Business Media.
+2. Boyd, S., & Vandenberghe, L. (2004). Convex optimization. Cambridge university press.
+3. Luenberger, D. G., & Ye, Y. (2008). Linear and nonlinear programming. Springer Science & Business Media.
+
