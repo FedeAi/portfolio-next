@@ -35,7 +35,7 @@ import { formatDate, getBlogPosts } from "./lib/posts";
 
 function BlogPostCard({ post }) {
   return (
-    <Link href={`/blog/${post.slug}`} className="block w-64 flex-shrink-0">
+    <Link href={`/blog/${post.slug}`} className="block flex-shrink-0 w-full sm:w-1/2 md:w-1/3 p-4 ">
        {/* FIXME this link is causing the error: Error: Hydration failed because the initial UI does not match what was rendered on the server. */}
           {/* See more info here: https://nextjs.org/docs/messages/react-hydration-error */}
           {/* Expected server HTML to contain a matching <div> in <a>. */}
@@ -108,7 +108,8 @@ function ExperienceSection({ title, imageSrc, imageAlt, points, description, lin
 export default function Page() {
   const blogPosts = getBlogPosts();
   return (
-<section className="max-w-4xl mx-auto px-4 py-8">
+<section className="max-w-4xl px-4 py-8">
+{/* <section className="max-w-4xl mx-auto px-4 py-8"> */}
       <div className="flex flex-col md:flex-row items-center md:items-start mb-12">
         <Image
           src="/profile.png"
@@ -177,7 +178,7 @@ export default function Page() {
       <div className="mt-16">
         <h2 className="text-2xl font-bold mb-6">Latest Blog Posts</h2>
         <div className="overflow-x-auto pb-4">
-          <div className="flex space-x-6">
+          <div className="flex flex-no-wrap scrolling-touch space-x-6">
             {blogPosts
             .sort((a, b) => {
               if (new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)) {
@@ -194,5 +195,3 @@ export default function Page() {
     </section>
   );
 }
-
-
