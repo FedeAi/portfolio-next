@@ -15,6 +15,7 @@ export default function BlogPosts() {
       <h1 className="mb-8 text-3xl font-bold tracking-tight text-center">My Blog</h1>
       <div className="grid gap-8 md:grid-cols-2">
         {allBlogs
+          .filter((post) => post.metadata.isListed !== 'false')
           .sort((a, b) => {
             if (
             new Date(a.metadata.publishedAt) >
