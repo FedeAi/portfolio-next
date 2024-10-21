@@ -1,0 +1,151 @@
+---
+title: "Multi Path Trajectory Tracking in Dynamic Traffic Environment"
+publishedAt: "2024-06-19"
+summary: "Exploring an optimal control system using Model Predictive Control for autonomous vehicle navigation in dynamic traffic."
+tags: "MPC, Path Planning, Trajectory Tracking, Matlab, Simulation"
+image: "/images/multi-path-trajectory-tracking-in-dynamic-traffic-enviroment/system-subdivision.png"
+---
+
+## Introduction
+
+The challenge of autonomous navigation in a dynamic traffic environment is both complex and fascinating. This project, **Multi Path Trajectory Tracking in Dynamic Traffic**, aims to design a control system for autonomous vehicles that can track a global trajectory while safely navigating through traffic. 
+
+At its core, the project is built around a **Model Predictive Control (MPC)** system, which balances path-following with real-time collision avoidance. Unlike traditional autonomous control systems that separate local trajectory planning from the tracking mechanism, this project unifies these into a streamlined approach. 
+
+This integration simplifies the system's response to dynamic changes, reducing the delay between perception and actuation, and improving the vehicle's safety and overall responsiveness.
+
+
+<Image
+  src="/images/multi-path-trajectory-tracking-in-dynamic-traffic-enviroment/system-architecture.png"
+  alt="System Architecture Overview"
+  width={640}
+  height={500}
+/>
+<Caption>
+    System Architecture Overview
+</Caption>
+
+The image above provides a conceptual overview of the system. The control module receives sensor input from the acquisition and perception layers, processes it in real-time, and adjusts the vehicle's steering, acceleration, and braking commands accordingly.
+
+## Project Overview
+
+The goal of the project is to create an autonomous control system capable of:
+
+1. Safely navigating traffic in a multi-lane highway environment.
+2. Avoiding collisions with other vehicles by dynamically adjusting the trajectory.
+3. Seamlessly switching between different lanes based on traffic conditions.
+
+The vehicle's path is determined by a global trajectory, but the system must continuously monitor the local environment (i.e., nearby vehicles and road boundaries) and adjust its course accordingly. By merging the tasks of **local trajectory planning** and **trajectory tracking**, the control system minimizes the delay in decision-making, enhancing its safety features.
+
+## System Description and Simulation Environment
+
+The control system is built and tested in a **simulation environment**, designed to mimic real-world traffic conditions. This environment models both the ego vehicle (the one under control) and other vehicles on the highway. Each vehicle is governed by a simplified dynamic model, which strikes a balance between realism and computational efficiency.
+
+<Image
+  src="/images/multi-path-trajectory-tracking-in-dynamic-traffic-enviroment/system-subdivision.png"
+  alt="System Subdivision"
+  width={640}
+  height={500}
+/>
+<Caption>
+    System Subdivision, showing the interaction between the control system and the simulation environment.
+</Caption>
+
+The simulation environment consists of the following components:
+
+- **Ego Vehicle Model**: The ego vehicle's behavior is modeled using a **single-track vehicle model**. This model provides a simplified but accurate representation of a car's motion, particularly during critical maneuvers such as lane changes.
+- **Other Vehicles**: To simulate real traffic, other vehicles are represented as point masses moving at constant speeds. Only the three closest vehicles to the ego vehicle are considered in the optimization process, ensuring computational feasibility without compromising safety.
+- **Digital Twin**: The environment also serves as a digital twin of the real-world scenario. It accepts control variables as input and outputs the state of the ego and surrounding vehicles, providing a visual representation of the interaction between them.
+
+## Model Predictive Control (MPC)
+
+### What is MPC?
+
+**Model Predictive Control (MPC)** is a control strategy that uses a dynamic model of the vehicle to predict its future behavior. The controller then optimizes the control inputs (throttle, braking, and steering) to minimize a predefined cost function while satisfying system constraints. This allows the vehicle to navigate complex environments, such as multi-lane highways with dynamic traffic.
+
+#### Key Factors Considered in MPC:
+
+- **Tracking Error**: The system continuously compares the vehicle's current state to the desired trajectory, minimizing deviations in position, speed, and heading.
+- **Control Effort**: To ensure smooth driving, the controller penalizes abrupt changes in steering and throttle inputs.
+- **Collision Avoidance**: The proximity to other vehicles is a critical factor. A high penalty is applied if the ego vehicle comes too close to any surrounding vehicles.
+
+
+<Image
+  src="/images/multi-path-trajectory-tracking-in-dynamic-traffic-enviroment/fhocp.png"
+  alt="MPC Optimization Process"
+  width={640}
+  height={500}
+/>
+
+
+### Constraints
+
+The control system must operate within several constraints to ensure that it behaves safely and realistically. These constraints can be broadly categorized as **linear** and **non-linear**.
+
+- **Linear Constraints**: These include the physical limits of the vehicle’s actuators, such as the maximum steering angle or torque.
+- **Non-Linear Constraints**: These ensure safety, requiring that the vehicle maintains a safe distance from others, adheres to lane boundaries, and limits sudden changes in steering or acceleration.
+
+One of the most critical non-linear constraints is based on **Mahalanobis distance**, which weights the lateral and longitudinal distances between vehicles differently. In highway driving, small lateral distances are less dangerous than small longitudinal distances, where rear-end collisions are a greater concern.
+
+
+<Image
+  src="/images/multi-path-trajectory-tracking-in-dynamic-traffic-enviroment/mahalanobis-distance.png"
+  alt="Mahalanobis Distance Example"
+  width={640}
+  height={500}
+/>
+
+
+## Simulation Results
+
+The control system was tested in a variety of traffic scenarios to validate its performance.
+
+### Continuous Lane Change
+
+In this scenario, the ego vehicle is allowed to continuously change lanes to avoid other vehicles. The control system dynamically adjusts its path, maintaining the target speed and ensuring a safe distance from nearby vehicles. The MPC successfully balances between lane changes and maintaining the global trajectory.
+
+### Emergency Stop
+
+When all lanes ahead of the ego vehicle are blocked, the system executes an emergency stop, calculating the braking force needed to avoid a collision. The system gracefully slows down the vehicle, ensuring that it comes to a halt without abrupt actions that could jeopardize passenger comfort or vehicle safety.
+
+### Obstacle Avoidance
+
+In situations where the ego vehicle encounters an obstacle (such as a slow-moving vehicle), the system adapts by either braking or moving into the emergency lane if available. This showcases the flexibility of the MPC system to handle real-world challenges in dynamic environments.
+
+
+<Image
+  src="/images/multi-path-trajectory-tracking-in-dynamic-traffic-enviroment/obstacle-avoidance-plot.png"
+  alt="Simulation of Obstacle Avoidance"
+  width={640}
+  height={500}
+/>
+<Caption>
+    Simulation of Obstacle Avoidance: The ego vehicle successfully avoids a slow-moving obstacle by changing lanes. The system adapts to the dynamic environment in real-time.
+</Caption>
+
+<Image
+  src="/images/multi-path-trajectory-tracking-in-dynamic-traffic-enviroment/obstacle-avoidance-enviroment.png"
+  alt="Obstacle Avoidance Environment"
+  width={640}
+  height={500}
+/>
+<Caption>
+    Obstacle Avoidance Environment: The ego vehicle (blue) navigates around a slow-moving obstacle (red) by changing lanes.
+</Caption>
+
+
+## Limitations and Future Improvements
+
+While the project successfully demonstrates the potential of MPC in dynamic traffic scenarios, it also highlights several limitations:
+
+1. **Computational Efficiency**: The optimization process is computationally intensive, especially for real-time applications. Future iterations of the system should focus on improving the algorithm’s efficiency without sacrificing performance.
+2. **Optimization Horizon**: The current system operates with an optimization period of 0.25 seconds, which is slower than real-world systems. Decreasing this period could improve responsiveness in high-speed environments.
+3. **Refining Collision Avoidance**: The proximity cost function could be further refined by making it dependent on the relative speeds of the ego vehicle and surrounding traffic.
+
+By addressing these challenges, the control system could be made more robust and suitable for real-world deployment.
+
+## Conclusion
+
+The **Multi Path Trajectory Tracking in Dynamic Traffic Environment** project demonstrates a successful implementation of MPC for autonomous navigation. By merging local trajectory planning and trajectory tracking into a unified system, it enhances both safety and performance. The project lays a solid foundation for future work in autonomous vehicle control systems, particularly for applications in complex, real-world traffic environments.
+
+While challenges related to computational efficiency and safety remain, the insights gained from this research pave the way for more advanced systems capable of handling real-time dynamic environments with greater precision.
