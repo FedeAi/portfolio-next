@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { socialLinks } from "./config";
+import { formatDate, getBlogPosts } from "./lib/posts";
 
 // function ExperienceSection({ title, imageSrc, imageAlt, points, description, link }) {
 //   return (
@@ -31,6 +32,34 @@ import { socialLinks } from "./config";
 //     </div>
 //   );
 // }
+
+function BlogPostCard({ post }) {
+  return (
+    <Link href={`/blog/${post.slug}`} className="block w-64 flex-shrink-0">
+       {/* FIXME this link is causing the error: Error: Hydration failed because the initial UI does not match what was rendered on the server. */}
+          {/* See more info here: https://nextjs.org/docs/messages/react-hydration-error */}
+          {/* Expected server HTML to contain a matching <div> in <a>. */}
+          
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        {post.metadata.image && (
+          <Image
+            src={post.metadata.image}
+            alt={post.metadata.title}
+            width={256}
+            height={144}
+            className="w-full h-36 object-cover"
+          />
+        )}
+        <div className="p-4">
+          <h4 className="text-lg font-semibold mb-2 line-clamp-2">{post.metadata.title}</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{formatDate(post.metadata.publishedAt)}</p>
+          <p className="text-sm text-gray-700 dark:text-gray-200 line-clamp-3">{post.metadata.summary}</p>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 
 function slugify(text) {
   return text
@@ -77,6 +106,7 @@ function ExperienceSection({ title, imageSrc, imageAlt, points, description, lin
 }
 
 export default function Page() {
+  const blogPosts = getBlogPosts();
   return (
 <section className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row items-center md:items-start mb-12">
@@ -140,6 +170,25 @@ export default function Page() {
               {skill}
             </span>
           ))}
+        </div>
+      </div>
+
+
+      <div className="mt-16">
+        <h2 className="text-2xl font-bold mb-6">Latest Blog Posts</h2>
+        <div className="overflow-x-auto pb-4">
+          <div className="flex space-x-6">
+            {blogPosts
+            .sort((a, b) => {
+              if (new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)) {
+                return -1;
+              }
+              return 1;
+            })
+            .map((post) => (
+              <BlogPostCard key={post.slug} post={post} />
+            ))}
+          </div>
         </div>
       </div>
     </section>
